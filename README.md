@@ -75,8 +75,8 @@ After opening pgAdmin, register a new server:
 
 - Hostname: `db`
 - Port: `5432`
-- Username: `learner`
-- Password: `<pass>`
+- Username: `admin`
+- Password: `adminpass`
 
 ## 🧪 ETL Overview
 

@@ -1,9 +1,6 @@
-# -------------------------------
-# Stage 1: Base Image
-# -------------------------------
 FROM python:3.11-slim
 
-# Install system utilities + cron
+# Install system packages including cron
 RUN apt-get update && apt-get install -y --no-install-recommends \
     cron \
     gcc \
@@ -12,32 +9,24 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# -------------------------------
-# Stage 2: ETL Code
-# -------------------------------
 WORKDIR /app
+
+# Create logs directory
 RUN mkdir -p /app/logs
 
-# Copy Python requirements and ETL script
+# Copy ETL files
 COPY requirements.txt /app/requirements.txt
 COPY etl_daily.py /app/etl_daily.py
-
-# Install Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
-
-# -------------------------------
-# Stage 3: Cron Setup
-# -------------------------------
-# Copy cron job file
 COPY cronjob /etc/cron.d/etl-cron
+COPY entrypoint.sh /app/entrypoint.sh
 
-# Set permission
-RUN chmod 0644 /etc/cron.d/etl-cron
+# Install requirements
+RUN pip install --no-cache-dir -r /app/requirements.txt
 
-# Register cron job
-RUN crontab /etc/cron.d/etl-cron
+# Fix permissions
+RUN chmod 0644 /etc/cron.d/etl-cron && \
+    crontab /etc/cron.d/etl-cron && \
+    chmod +x /app/entrypoint.sh
 
-# -------------------------------
-# Stage 4: Container Start Command
-# -------------------------------
-CMD ["cron", "-f"]
+# Default command → entrypoint script
+ENTRYPOINT ["/app/entrypoint.sh"]
