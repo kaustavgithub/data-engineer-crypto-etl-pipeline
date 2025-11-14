@@ -1,0 +1,1 @@
+0 0 * * * python3 /app/etl_daily.py /app/logs/etl_pipeline.log >> /app/logs/cron.log 2>&1
